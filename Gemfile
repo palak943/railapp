@@ -74,3 +74,6 @@ end
 # Gemfile
 gem 'bcrypt', '~> 3.1.7'
 gem 'jwt', '~> 2.3.0'
+gem 'devise'
+gem 'stripe'
+

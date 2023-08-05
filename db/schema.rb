@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_03_225542) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_05_083816) do
+  create_table "article_revisions", force: :cascade do |t|
+    t.integer "article_id"
+    t.string "title"
+    t.string "category"
+    t.string "image"
+    t.text "text"
+    t.string "author"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article_id"], name: "index_article_revisions_on_article_id"
+  end
+
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.string "category"
@@ -20,7 +32,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_03_225542) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.string "status"
     t.index ["user_id"], name: "index_articles_on_user_id"
+  end
+
+  create_table "articles_lists", id: false, force: :cascade do |t|
+    t.integer "list_id", null: false
+    t.integer "article_id", null: false
   end
 
   create_table "comments", force: :cascade do |t|
@@ -42,17 +60,39 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_03_225542) do
     t.index ["user_id"], name: "index_likes_on_user_id"
   end
 
+  create_table "lists", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_lists_on_user_id"
+  end
+
+  create_table "saved_articles", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "article_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article_id"], name: "index_saved_articles_on_article_id"
+    t.index ["user_id"], name: "index_saved_articles_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
     t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "post_limit", default: 1
   end
 
+  add_foreign_key "article_revisions", "articles"
   add_foreign_key "articles", "users"
   add_foreign_key "comments", "articles"
   add_foreign_key "comments", "users"
   add_foreign_key "likes", "articles"
   add_foreign_key "likes", "users"
+  add_foreign_key "lists", "users"
+  add_foreign_key "saved_articles", "articles"
+  add_foreign_key "saved_articles", "users"
 end

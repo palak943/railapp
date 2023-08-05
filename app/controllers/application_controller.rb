@@ -1,23 +1,18 @@
 class ApplicationController < ActionController::Base
-    def current_user
-        @current_user ||= User.find_by(id: decode_token)
-    end
-    def require_login
-        unless current_user
-          redirect_to login_path, alert: 'Please log in first.'
-        end
-    end
+    skip_before_action :verify_authenticity_token
+    before_action :authenticate_user!
+    def authenticate_user
+        token = request.headers['Authorization']&.split&.last
     
-      private
-    
-      def decode_token
-        token = request.headers['Authorization'].split(' ').last rescue nil
         begin
-          decoded_token = JWT.decode(token, Rails.application.secrets.secret_key_base)[0]
-          decoded_token['user_id']
+          decoded_token = JWT.decode(token, Rails.application.secrets.secret_key_base, true, algorithm: 'HS256')
+          @current_user_id = decoded_token.first['user_id']
         rescue JWT::DecodeError
-          nil
+          render json: { error: 'Invalid token' }, status: :unauthorized
         end
       end
-      
+    
+      def current_user
+        @current_user ||= User.find(@current_user_id)
+      end
 end
